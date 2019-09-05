@@ -1,0 +1,3 @@
+[submodule "jw"]
+	path = jw
+	url = https://gitlab.imn.htwk-leipzig.de/waldmann/numbers-game.git
