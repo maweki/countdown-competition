@@ -7,9 +7,10 @@ data Term = Term [Integer] [Operation]
 data Operation = Operation {fun :: (Integer -> Integer -> Maybe Integer), name :: String}
 
 instance Show Term where
-  show (Term (i:is) (o:os)) =  "(" ++ show i  ++ name o ++ show (Term is os) ++ ")"
   show (Term [i] []) = show i
-  show (Term _ _) = undefined
+  -- show (Term (is) (os)) = show is ++ "||" ++ (show $ map name os)
+  show (Term (is) (os)) =  "(" ++ show (Term (init is) (init os)) ++ (name $ last os) ++  show (last is)  ++ ")"
+  -- show (Term _ _) = undefined
 
 operations = [  Operation (\x y -> return (x + y)) "+"
              ,  Operation (\x y -> return (x * y)) "*"
@@ -23,12 +24,12 @@ equals g (Term (i1:i2:is) ((Operation f _):ops)) = let res = f i1 i2
                                                    in case res of
                                                         Nothing -> (False, undefined)
                                                         Just v -> if v == g
-                                                                  then (True, length ops)
+                                                                  then (True, length is)
                                                                   else equals g (Term (v:is) ops)
 
 shortenTermBy :: Term -> Int -> Term
 shortenTermBy t 0 = t
-shortenTermBy (Term is op) n = (Term (drop n $ reverse is) (drop n $ reverse op))
+shortenTermBy (Term is op) n = (Term (reverse $ drop n $ reverse is) (reverse $ drop n $ reverse op))
 
 {-# INLINE nest #-}
 nest :: Int -> (a -> a) -> a -> a
@@ -48,6 +49,7 @@ solve :: [Integer] -> Integer -> [Term]
 solve nums target = let possible_solutions = map (\x -> (x, equals target x)) (terms nums)
                         solutions = filter (\x -> ((fst.snd) x)) possible_solutions
                         shortSols = map (\(x, (True, n)) -> shortenTermBy x n) solutions
+                        -- shortSols = map (\(x, (True, n)) -> x ) solutions
                     in shortSols
 
 size (Term n _) = length n
